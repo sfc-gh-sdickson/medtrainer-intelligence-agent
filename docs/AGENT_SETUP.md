@@ -97,9 +97,42 @@ Execute the SQL files in the following sequence:
 
 ---
 
-## Step 2: Create Snowflake Intelligence Agent
+## Step 2: Grant Cortex Analyst Permissions
 
-### 2.1 Via Snowsight UI
+Before creating the agent, ensure proper permissions are configured:
+
+### 2.1 Grant Database Role for Cortex Analyst
+
+```sql
+USE ROLE ACCOUNTADMIN;
+
+-- Grant Cortex Analyst user role to your role
+GRANT DATABASE ROLE SNOWFLAKE.CORTEX_ANALYST_USER TO ROLE <your_role>;
+
+-- Grant usage on the database and schemas
+GRANT USAGE ON DATABASE MEDTRAINER_INTELLIGENCE TO ROLE <your_role>;
+GRANT USAGE ON SCHEMA MEDTRAINER_INTELLIGENCE.ANALYTICS TO ROLE <your_role>;
+GRANT USAGE ON SCHEMA MEDTRAINER_INTELLIGENCE.RAW TO ROLE <your_role>;
+
+-- Grant privileges on semantic views
+GRANT REFERENCES, SELECT ON SEMANTIC VIEW MEDTRAINER_INTELLIGENCE.ANALYTICS.SV_LEARNING_CREDENTIALING_INTELLIGENCE TO ROLE <your_role>;
+GRANT REFERENCES, SELECT ON SEMANTIC VIEW MEDTRAINER_INTELLIGENCE.ANALYTICS.SV_SUBSCRIPTION_REVENUE_INTELLIGENCE TO ROLE <your_role>;
+GRANT REFERENCES, SELECT ON SEMANTIC VIEW MEDTRAINER_INTELLIGENCE.ANALYTICS.SV_ORGANIZATION_SUPPORT_INTELLIGENCE TO ROLE <your_role>;
+
+-- Grant usage on warehouse
+GRANT USAGE ON WAREHOUSE MEDTRAINER_WH TO ROLE <your_role>;
+
+-- Grant usage on Cortex Search services
+GRANT USAGE ON CORTEX SEARCH SERVICE MEDTRAINER_INTELLIGENCE.RAW.SUPPORT_TRANSCRIPTS_SEARCH TO ROLE <your_role>;
+GRANT USAGE ON CORTEX SEARCH SERVICE MEDTRAINER_INTELLIGENCE.RAW.INCIDENT_REPORTS_SEARCH TO ROLE <your_role>;
+GRANT USAGE ON CORTEX SEARCH SERVICE MEDTRAINER_INTELLIGENCE.RAW.TRAINING_MATERIALS_SEARCH TO ROLE <your_role>;
+```
+
+---
+
+## Step 3: Create Snowflake Intelligence Agent
+
+### 3.1 Via Snowsight UI
 
 1. Navigate to **Snowsight** (Snowflake Web UI)
 2. Go to **AI & ML** → **Agents**
@@ -112,59 +145,126 @@ Name: MedTrainer_Intelligence_Agent
 Description: AI agent for analyzing MedTrainer training compliance, credentialing, subscriptions, and revenue intelligence
 ```
 
-**Data Sources (Semantic Views):**
-Add the following semantic views:
-- `MEDTRAINER_INTELLIGENCE.ANALYTICS.SV_LEARNING_CREDENTIALING_INTELLIGENCE`
-- `MEDTRAINER_INTELLIGENCE.ANALYTICS.SV_SUBSCRIPTION_REVENUE_INTELLIGENCE`
-- `MEDTRAINER_INTELLIGENCE.ANALYTICS.SV_ORGANIZATION_SUPPORT_INTELLIGENCE`
-
-**Warehouse:**
-- Select: `MEDTRAINER_WH`
-
-**Instructions (System Prompt):**
-```
-You are an AI intelligence agent for MedTrainer, a leading healthcare compliance and training platform.
-
-Your role is to analyze:
-1. Learning & Training: Course completions, certifications, compliance status, employee training records
-2. Credentialing: Provider licenses, verifications, exclusions monitoring, expiration tracking
-3. Compliance: Incident reports, policy acknowledgments, accreditation status, regulatory compliance
-4. Subscriptions: Service utilization, customer health, renewal risks, product adoption
-5. Revenue Analytics: Transactions, pricing, product performance, customer lifetime value
-6. Support Operations: Ticket resolution, agent performance, customer satisfaction
-
-When answering questions:
-- Provide specific metrics and data-driven insights
-- Compare trends over time and across dimensions
-- Highlight compliance risks and credential expirations
-- Identify training gaps and overdue requirements
-- Benchmark performance across organizations and services
-- Calculate rates, percentages, and derived metrics
-- Identify actionable recommendations for customer success
-
-Data Context:
-- Organizations: Hospitals, clinics, and healthcare practices
-- Employees: Healthcare providers and staff requiring training and credentials
-- Courses: CPR/BLS, OSHA, HIPAA, infection control, clinical training
-- Credentials: Medical licenses, nursing licenses, DEA registrations, certifications
-- Services: Learning (training), Credentialing (verification), Compliance (incident/policy management)
-- Subscription Tiers: BASIC, PROFESSIONAL, ENTERPRISE across service types
-```
-
 5. Click **Create Agent**
+
+The agent is now created. Next, you'll add tools (Cortex Analyst and Cortex Search).
 
 ---
 
-## Step 3: Add Cortex Search Services to Agent
+### 3.2 Add Cortex Analyst Tools (Semantic Views)
 
-### 3.1 Add Support Transcripts Search
+After creating the agent, add the semantic views as Cortex Analyst tools:
 
-1. In Agent settings, click **Tools**
-2. Find **Cortex Search** and click **+ Add**
+1. In the agent details page, select **Edit**
+2. Select **Tools**
+3. Find **Cortex Analyst** and select **+ Add**
+
+**For each semantic view, repeat these steps:**
+
+#### Semantic View 1: Learning & Credentialing Intelligence
+
+1. **Name**: Learning and Credentialing Intelligence
+2. **Semantic view**: Select `MEDTRAINER_INTELLIGENCE.ANALYTICS.SV_LEARNING_CREDENTIALING_INTELLIGENCE`
+3. **Warehouse**: Select `MEDTRAINER_WH`
+4. **Query timeout (seconds)**: 60
+5. **Description**:
+   ```
+   Analyzes training compliance, course completions, employee credentials, and 
+   credentialing verification. Use for questions about employee training status, 
+   credential expirations, course effectiveness, and compliance tracking.
+   ```
+6. Select **Add**
+
+#### Semantic View 2: Subscription & Revenue Intelligence
+
+1. Find **Cortex Analyst** and select **+ Add** again
+2. **Name**: Subscription and Revenue Intelligence
+3. **Semantic view**: Select `MEDTRAINER_INTELLIGENCE.ANALYTICS.SV_SUBSCRIPTION_REVENUE_INTELLIGENCE`
+4. **Warehouse**: Select `MEDTRAINER_WH`
+5. **Query timeout (seconds)**: 60
+6. **Description**:
+   ```
+   Analyzes subscription health, revenue trends, transaction patterns, and product
+   performance. Use for questions about subscription renewals, revenue analysis,
+   product adoption, and customer lifetime value.
+   ```
+7. Select **Add**
+
+#### Semantic View 3: Organization Support Intelligence
+
+1. Find **Cortex Analyst** and select **+ Add** again
+2. **Name**: Organization Support Intelligence
+3. **Semantic view**: Select `MEDTRAINER_INTELLIGENCE.ANALYTICS.SV_ORGANIZATION_SUPPORT_INTELLIGENCE`
+4. **Warehouse**: Select `MEDTRAINER_WH`
+5. **Query timeout (seconds)**: 60
+6. **Description**:
+   ```
+   Analyzes support ticket resolution, agent performance, and customer satisfaction.
+   Use for questions about support efficiency, ticket trends, agent productivity,
+   and customer satisfaction metrics.
+   ```
+7. Select **Add**
+
+8. Select **Save** to save all tool configurations
+
+---
+
+### 3.3 Configure Orchestration
+
+Configure how the agent orchestrates across tools:
+
+1. Select **Orchestration**
+2. **Orchestration model**: Select a model (e.g., `mistral-large2`)
+3. **Planning instructions**:
+   ```
+   Use Cortex Analyst semantic views for structured data queries about metrics, 
+   counts, aggregations, and trends. Use Cortex Search for finding similar past 
+   cases, incidents, or documentation. Always check training compliance data 
+   before answering questions about employee status.
+   ```
+4. **Response instruction**:
+   ```
+   Provide clear, concise answers with specific metrics. Always cite the data source.
+   Highlight actionable insights and compliance risks. Maintain a professional,
+   helpful tone. When showing trends, explain what they mean for the business.
+   ```
+5. Select **Save**
+
+---
+
+### 3.4 Set Up Access to the Agent
+
+Grant roles access to use the agent:
+
+1. Select **Access**
+2. Select **Add role**
+3. Select the role(s) that should have access to the agent
+4. Select **Save**
+
+---
+
+### 3.5 Test Cortex Analyst Tools
+
+Test that Cortex Analyst works with the semantic views:
+
+1. On the agent details page, use the agent playground
+2. Ask a simple question: **"How many organizations are in the system?"**
+3. Verify the agent:
+   - Selects the appropriate semantic view
+   - Generates a SQL query
+   - Returns the correct count (~50,000 organizations)
+4. Review the SQL query generated to ensure it's using the semantic views correctly
+
+---
+
+## Step 4: Add Cortex Search Services to Agent
+
+### 4.1 Add Support Transcripts Search
+
+1. In the agent details page (still in Edit mode), select **Tools** if not already there
+2. Find **Cortex Search Services** and select **+ Add**
 3. Configure:
    - **Name**: Support Transcripts Search
-   - **Search service**: `MEDTRAINER_INTELLIGENCE.RAW.SUPPORT_TRANSCRIPTS_SEARCH`
-   - **Warehouse**: `MEDTRAINER_WH`
    - **Description**:
      ```
      Search 25,000 customer support transcripts to find similar issues,
@@ -172,14 +272,14 @@ Data Context:
      about customer service patterns, technical troubleshooting, feature usage,
      and common support scenarios.
      ```
+   - **Search service**: Select `MEDTRAINER_INTELLIGENCE.RAW.SUPPORT_TRANSCRIPTS_SEARCH`
+4. Select **Add**
 
-### 3.2 Add Incident Reports Search
+### 4.2 Add Incident Reports Search
 
-1. Click **+ Add** again for Cortex Search
+1. Find **Cortex Search Services** and select **+ Add** again
 2. Configure:
    - **Name**: Incident Reports Search
-   - **Search service**: `MEDTRAINER_INTELLIGENCE.RAW.INCIDENT_REPORTS_SEARCH`
-   - **Warehouse**: `MEDTRAINER_WH`
    - **Description**:
      ```
      Search 15,000 incident investigation reports to find similar incidents,
@@ -187,26 +287,29 @@ Data Context:
      patient safety, medication errors, HIPAA breaches, workplace injuries,
      and incident patterns.
      ```
+   - **Search service**: Select `MEDTRAINER_INTELLIGENCE.RAW.INCIDENT_REPORTS_SEARCH`
+3. Select **Add**
 
-### 3.3 Add Training Materials Search
+### 4.3 Add Training Materials Search
 
-1. Click **+ Add** again for Cortex Search
+1. Find **Cortex Search Services** and select **+ Add** again
 2. Configure:
    - **Name**: Training Materials Search
-   - **Search service**: `MEDTRAINER_INTELLIGENCE.RAW.TRAINING_MATERIALS_SEARCH`
-   - **Warehouse**: `MEDTRAINER_WH`
    - **Description**:
      ```
      Search training materials and compliance guides for procedures,
      protocols, and best practices. Use for questions about HIPAA privacy,
      infection control, CPR/BLS procedures, and regulatory compliance guidance.
      ```
+   - **Search service**: Select `MEDTRAINER_INTELLIGENCE.RAW.TRAINING_MATERIALS_SEARCH`
+3. Select **Add**
+4. Select **Save** to save all Cortex Search configurations
 
 ---
 
-## Step 4: Test the Agent
+## Step 5: Test the Agent
 
-### 4.1 Simple Test Questions
+### 5.1 Simple Test Questions
 
 Start with simple questions to verify connectivity:
 
@@ -222,7 +325,7 @@ Start with simple questions to verify connectivity:
    - Should query SV_ORGANIZATION_SUPPORT_INTELLIGENCE
    - Expected: Count of tickets with status = 'OPEN'
 
-### 4.2 Complex Test Questions
+### 5.2 Complex Test Questions
 
 Test with the 10 complex questions provided in `docs/questions.md`, including:
 
@@ -237,7 +340,7 @@ Test with the 10 complex questions provided in `docs/questions.md`, including:
 9. Support Efficiency Benchmarking
 10. Policy Compliance Tracking
 
-### 4.3 Cortex Search Test Questions
+### 5.3 Cortex Search Test Questions
 
 Test unstructured data search:
 
@@ -247,7 +350,7 @@ Test unstructured data search:
 
 ---
 
-## Step 5: Query Cortex Search Services Directly
+## Step 6: Query Cortex Search Services Directly
 
 You can also query Cortex Search services directly using SQL:
 
@@ -295,9 +398,11 @@ SELECT PARSE_JSON(
 
 ---
 
-## Step 6: Access Control
+## Step 7: Additional Access Control (Optional)
 
 ### Create Role for Agent Users
+
+If you need to create additional roles for other users:
 ```sql
 CREATE ROLE IF NOT EXISTS MEDTRAINER_AGENT_USER;
 
