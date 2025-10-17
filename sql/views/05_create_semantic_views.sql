@@ -24,7 +24,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_LEARNING_CREDENTIALING_INTELLIGENCE
   TABLES (
     organizations AS RAW.ORGANIZATIONS
       PRIMARY KEY (organization_id)
-      WITH SYNONYMS ('healthcare organizations', 'clients', 'customers')
+      WITH SYNONYMS ('healthcare organizations', 'training clients', 'learning customers')
       COMMENT = 'Healthcare organizations using MedTrainer',
     employees AS RAW.EMPLOYEES
       PRIMARY KEY (employee_id)
@@ -52,19 +52,19 @@ CREATE OR REPLACE SEMANTIC VIEW SV_LEARNING_CREDENTIALING_INTELLIGENCE
   )
   DIMENSIONS (
     organizations.organization_name AS organization_name
-      WITH SYNONYMS ('client name', 'customer name', 'facility name')
+      WITH SYNONYMS ('org name view1', 'healthcare facility name', 'training org name')
       COMMENT = 'Name of the healthcare organization',
     organizations.organization_status AS organization_status
-      WITH SYNONYMS ('account status', 'client status')
+      WITH SYNONYMS ('account status view1', 'org active status')
       COMMENT = 'Organization status: ACTIVE, SUSPENDED, CLOSED',
     organizations.organization_type AS organization_type
-      WITH SYNONYMS ('facility type', 'organization category')
+      WITH SYNONYMS ('org type view1', 'healthcare facility type')
       COMMENT = 'Organization type: HOSPITAL, CLINIC, PRACTICE',
     organizations.state AS state
-      WITH SYNONYMS ('location state', 'org state')
+      WITH SYNONYMS ('org state view1', 'organization location state')
       COMMENT = 'Organization state location',
     organizations.city AS city
-      WITH SYNONYMS ('location city', 'org city')
+      WITH SYNONYMS ('org city view1', 'organization location city')
       COMMENT = 'Organization city location',
     employees.employee_name AS employee_name
       WITH SYNONYMS ('staff name', 'provider name')
@@ -73,7 +73,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_LEARNING_CREDENTIALING_INTELLIGENCE
       WITH SYNONYMS ('position', 'role', 'title')
       COMMENT = 'Employee job title',
     employees.department AS department
-      WITH SYNONYMS ('dept', 'team')
+      WITH SYNONYMS ('dept', 'employee team')
       COMMENT = 'Employee department',
     employees.employee_status AS employee_status
       WITH SYNONYMS ('employment status', 'staff status')
@@ -117,7 +117,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_LEARNING_CREDENTIALING_INTELLIGENCE
   )
   METRICS (
     organizations.total_organizations AS COUNT(DISTINCT organization_id)
-      WITH SYNONYMS ('organization count', 'number of organizations')
+      WITH SYNONYMS ('organization count view1', 'number of orgs learning')
       COMMENT = 'Total number of organizations',
     organizations.avg_compliance_risk AS AVG(compliance_risk_score)
       WITH SYNONYMS ('average compliance risk', 'mean risk score')
@@ -162,11 +162,11 @@ CREATE OR REPLACE SEMANTIC VIEW SV_SUBSCRIPTION_REVENUE_INTELLIGENCE
   TABLES (
     organizations AS RAW.ORGANIZATIONS
       PRIMARY KEY (organization_id)
-      WITH SYNONYMS ('clients', 'customers')
+      WITH SYNONYMS ('subscription clients', 'revenue customers')
       COMMENT = 'Healthcare organizations',
     subscriptions AS RAW.SUBSCRIPTIONS
       PRIMARY KEY (subscription_id)
-      WITH SYNONYMS ('service subscriptions', 'plans', 'packages')
+      WITH SYNONYMS ('service subscriptions', 'plans', 'service plans')
       COMMENT = 'MedTrainer service subscriptions',
     transactions AS RAW.TRANSACTIONS
       PRIMARY KEY (transaction_id)
@@ -184,13 +184,13 @@ CREATE OR REPLACE SEMANTIC VIEW SV_SUBSCRIPTION_REVENUE_INTELLIGENCE
   )
   DIMENSIONS (
     organizations.organization_name AS organization_name
-      WITH SYNONYMS ('client name')
+      WITH SYNONYMS ('subscription org name', 'revenue client name')
       COMMENT = 'Name of the organization',
     organizations.organization_type AS organization_type
-      WITH SYNONYMS ('facility type', 'customer segment')
+      WITH SYNONYMS ('subscription org type', 'revenue customer segment')
       COMMENT = 'Organization type: HOSPITAL, CLINIC, PRACTICE',
     organizations.state AS state
-      WITH SYNONYMS ('org state', 'location state')
+      WITH SYNONYMS ('subscription org state', 'revenue location state')
       COMMENT = 'Organization state location',
     subscriptions.service_type AS service_type
       WITH SYNONYMS ('subscription type', 'service category')
@@ -211,16 +211,16 @@ CREATE OR REPLACE SEMANTIC VIEW SV_SUBSCRIPTION_REVENUE_INTELLIGENCE
       WITH SYNONYMS ('premium reporting', 'advanced analytics')
       COMMENT = 'Whether advanced reporting is included',
     transactions.transaction_type AS transaction_type
-      WITH SYNONYMS ('payment type', 'purchase type')
+      WITH SYNONYMS ('transaction category', 'purchase type')
       COMMENT = 'Transaction type: SUBSCRIPTION_NEW, SUBSCRIPTION_RENEWAL, COURSE_PURCHASE, etc',
     transactions.product_type AS product_type
-      WITH SYNONYMS ('service type')
+      WITH SYNONYMS ('transaction service type')
       COMMENT = 'Product type: LEARNING, CREDENTIALING, COMPLIANCE, FULL_SUITE',
     transactions.payment_method AS payment_method
-      WITH SYNONYMS ('payment type')
+      WITH SYNONYMS ('transaction payment type', 'payment method type')
       COMMENT = 'Payment method: CREDIT_CARD, ACH, WIRE_TRANSFER, CHECK',
     transactions.payment_status AS payment_status
-      WITH SYNONYMS ('transaction status')
+      WITH SYNONYMS ('transaction payment status', 'payment completion status')
       COMMENT = 'Payment status: COMPLETED, FAILED, REFUNDED',
     transactions.currency AS currency
       WITH SYNONYMS ('payment currency')
@@ -235,7 +235,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_SUBSCRIPTION_REVENUE_INTELLIGENCE
       WITH SYNONYMS ('subcategory')
       COMMENT = 'Product subcategory',
     products.billing_frequency AS billing_frequency
-      WITH SYNONYMS ('payment frequency')
+      WITH SYNONYMS ('product billing frequency', 'product payment frequency')
       COMMENT = 'Billing frequency for product',
     products.is_active AS is_active
       WITH SYNONYMS ('available', 'active product')
@@ -243,7 +243,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_SUBSCRIPTION_REVENUE_INTELLIGENCE
   )
   METRICS (
     organizations.total_organizations AS COUNT(DISTINCT organization_id)
-      WITH SYNONYMS ('organization count')
+      WITH SYNONYMS ('organization count view2', 'number of orgs subscriptions')
       COMMENT = 'Total number of organizations',
     subscriptions.total_subscriptions AS COUNT(DISTINCT subscription_id)
       WITH SYNONYMS ('subscription count', 'plan count')
@@ -291,7 +291,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_ORGANIZATION_SUPPORT_INTELLIGENCE
   TABLES (
     organizations AS RAW.ORGANIZATIONS
       PRIMARY KEY (organization_id)
-      WITH SYNONYMS ('clients', 'customers')
+      WITH SYNONYMS ('support clients', 'ticket customers')
       COMMENT = 'Healthcare organizations',
     tickets AS RAW.SUPPORT_TICKETS
       PRIMARY KEY (ticket_id)
@@ -308,10 +308,10 @@ CREATE OR REPLACE SEMANTIC VIEW SV_ORGANIZATION_SUPPORT_INTELLIGENCE
   )
   DIMENSIONS (
     organizations.organization_name AS organization_name
-      WITH SYNONYMS ('client name')
+      WITH SYNONYMS ('support org name', 'ticket client name')
       COMMENT = 'Name of the organization',
     organizations.organization_type AS organization_type
-      WITH SYNONYMS ('customer type', 'facility type')
+      WITH SYNONYMS ('support customer type', 'support facility type')
       COMMENT = 'Organization type: HOSPITAL, CLINIC, PRACTICE',
     tickets.issue_type AS issue_type
       WITH SYNONYMS ('problem type', 'ticket category')
@@ -329,7 +329,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_ORGANIZATION_SUPPORT_INTELLIGENCE
       WITH SYNONYMS ('support agent', 'rep name')
       COMMENT = 'Name of support agent',
     agents.department AS department
-      WITH SYNONYMS ('team', 'agent department')
+      WITH SYNONYMS ('support team', 'agent department')
       COMMENT = 'Agent department: LEARNING, CREDENTIALING, COMPLIANCE, TECHNICAL, BILLING',
     agents.specialization AS specialization
       WITH SYNONYMS ('expertise', 'specialty')
@@ -340,7 +340,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_ORGANIZATION_SUPPORT_INTELLIGENCE
   )
   METRICS (
     organizations.total_organizations AS COUNT(DISTINCT organization_id)
-      WITH SYNONYMS ('organization count')
+      WITH SYNONYMS ('organization count view3', 'number of orgs support')
       COMMENT = 'Total number of organizations',
     tickets.total_tickets AS COUNT(DISTINCT ticket_id)
       WITH SYNONYMS ('ticket count', 'case count', 'number of tickets')
