@@ -60,11 +60,11 @@ CREATE OR REPLACE SEMANTIC VIEW SV_LEARNING_CREDENTIALING_INTELLIGENCE
     organizations.organization_type AS organization_type
       WITH SYNONYMS ('facility type', 'organization category')
       COMMENT = 'Organization type: HOSPITAL, CLINIC, PRACTICE',
-    organizations.state AS org_state
-      WITH SYNONYMS ('location state', 'state')
+    organizations.state AS state
+      WITH SYNONYMS ('location state', 'org state')
       COMMENT = 'Organization state location',
-    organizations.city AS org_city
-      WITH SYNONYMS ('location city', 'city')
+    organizations.city AS city
+      WITH SYNONYMS ('location city', 'org city')
       COMMENT = 'Organization city location',
     employees.employee_name AS employee_name
       WITH SYNONYMS ('staff name', 'provider name')
@@ -189,8 +189,8 @@ CREATE OR REPLACE SEMANTIC VIEW SV_SUBSCRIPTION_REVENUE_INTELLIGENCE
     organizations.organization_type AS organization_type
       WITH SYNONYMS ('facility type', 'customer segment')
       COMMENT = 'Organization type: HOSPITAL, CLINIC, PRACTICE',
-    organizations.state AS org_state
-      WITH SYNONYMS ('state')
+    organizations.state AS state
+      WITH SYNONYMS ('org state', 'location state')
       COMMENT = 'Organization state location',
     subscriptions.service_type AS service_type
       WITH SYNONYMS ('subscription type', 'service category')
@@ -237,7 +237,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_SUBSCRIPTION_REVENUE_INTELLIGENCE
     products.billing_frequency AS billing_frequency
       WITH SYNONYMS ('payment frequency')
       COMMENT = 'Billing frequency for product',
-    products.product_active AS is_active
+    products.is_active AS is_active
       WITH SYNONYMS ('available', 'active product')
       COMMENT = 'Whether product is currently active'
   )
@@ -322,16 +322,16 @@ CREATE OR REPLACE SEMANTIC VIEW SV_ORGANIZATION_SUPPORT_INTELLIGENCE
     tickets.ticket_status AS ticket_status
       WITH SYNONYMS ('status', 'case status')
       COMMENT = 'Ticket status: OPEN, IN_PROGRESS, CLOSED',
-    tickets.support_channel AS channel
+    tickets.channel AS channel
       WITH SYNONYMS ('contact channel', 'communication method')
       COMMENT = 'Support channel: PHONE, EMAIL, CHAT, WEB_PORTAL',
     agents.agent_name AS agent_name
       WITH SYNONYMS ('support agent', 'rep name')
       COMMENT = 'Name of support agent',
-    agents.agent_department AS department
-      WITH SYNONYMS ('team', 'department')
+    agents.department AS department
+      WITH SYNONYMS ('team', 'agent department')
       COMMENT = 'Agent department: LEARNING, CREDENTIALING, COMPLIANCE, TECHNICAL, BILLING',
-    agents.agent_specialization AS specialization
+    agents.specialization AS specialization
       WITH SYNONYMS ('expertise', 'specialty')
       COMMENT = 'Agent specialization area',
     agents.agent_status AS agent_status
