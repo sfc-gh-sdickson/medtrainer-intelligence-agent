@@ -1,3 +1,5 @@
+<img src="..\Snowflake_Logo.svg" width="200">
+
 # MedTrainer Intelligence Agent - Complex Questions
 
 These 10 complex questions demonstrate the intelligence agent's ability to analyze MedTrainer's training compliance, credentialing, subscriptions, revenue metrics, and support operations across multiple dimensions.
