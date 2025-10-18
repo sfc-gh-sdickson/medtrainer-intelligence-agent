@@ -1,3 +1,5 @@
+<img src="Snowflake_Logo.svg" width="200">
+
 # MedTrainer Intelligence Agent Solution
 
 ## About MedTrainer
