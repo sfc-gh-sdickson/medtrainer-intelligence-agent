@@ -1,3 +1,5 @@
+<img src="Snowflake_Logo.svg" width="200">
+
 # MedTrainer Intelligence Agent - Validation Report
 
 **Date:** October 17, 2025  
