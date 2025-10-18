@@ -1,3 +1,5 @@
+<img src="Snowflake_Logo.svg" width="200">
+
 # Final Verification Checklist - File 05 and File 06
 
 ## File 05: Semantic Views - Complete Verification
